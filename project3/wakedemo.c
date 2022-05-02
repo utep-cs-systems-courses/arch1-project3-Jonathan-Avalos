@@ -67,8 +67,10 @@ void wdt_c_handler()
   
 void update_shape();
 void rules();
+void update_score();
 
 int incorrect = 0;
+char correct[]= {'0', '0', '0'};
 int ruling = 0;
 
 void main()
@@ -101,6 +103,9 @@ void main()
   }
   clearScreen(COLOR_RED);
   drawString5x7(40, 70, "GAME OVER", COLOR_WHITE, COLOR_BLACK);
+  drawString5x7(82, 80, correct, COLOR_WHITE, COLOR_BLACK);
+  drawString5x7(40, 80, "SCORE: ", COLOR_WHITE, COLOR_BLACK);
+
 }
 
 void
@@ -130,8 +135,32 @@ rules()
   ruling++;
 }
 
+void
+update_score()
+{
+  if (correct[2] == '9'){
+    correct[2] = '0';
+    if (correct[1] == '9'){
+      correct[1] = '0';
+      if (correct[0] == '9'){
+	correct[0] = '0';
+      }
+      else{
+	correct[0]++;
+      }
+    }
+    else{
+      correct[1]++;
+    }
+  }
+  else{
+    correct[2]++;
+  }
+  
+}
+
 int step = 0;
-char correct = '0';
+int guess = 0;
 int squares = 0;
 int speed = 60;
 int srand();
@@ -139,10 +168,10 @@ int srand();
 void
 update_shape()
 {
-  
-  char score[] = "SCORE:";
+ 
   fillRectangle(0, 0, screenWidth, 15, COLOR_BLACK);
-  drawString5x7(45, 5, score, COLOR_WHITE, COLOR_RED);
+  drawString5x7(45, 5, "SCORE: ", COLOR_WHITE, COLOR_RED);
+  drawString5x7(80, 5, correct, COLOR_WHITE, COLOR_RED);
   
   if (step <= speed) {
    
@@ -153,7 +182,8 @@ update_shape()
     squares++;
     if (switches & SW4){
       if (curr_color == 2){
-	correct++;
+	update_score();
+	guess++;
       }
       else{
 	incorrect++;
@@ -162,7 +192,8 @@ update_shape()
     }
     else if (switches & SW3) {
       if (curr_color == 1){
-	correct++;
+	update_score();
+	guess++;
       }
       else{
 	incorrect++;
@@ -171,7 +202,8 @@ update_shape()
     }
     else if (switches & SW1) {
       if (curr_color == 0){
-	correct++;
+	update_score();
+	guess++;
       }
       else{
 	incorrect++;
@@ -186,7 +218,7 @@ update_shape()
     int rand();
     curr_color = rand() % num_colors;
     position = (position+1) % num_positions;
-    if (correct%10 == 0 && speed > 10){
+    if (guess%10 == 0 && speed > 10){
       speed = speed - 10;
     }
   }
