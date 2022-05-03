@@ -2,6 +2,7 @@
 #include <libTimer.h>
 #include "lcdutils.h"
 #include "lcddraw.h"
+#include "buzzer.h"
 #include <time.h>
 
 // WARNING: LCD DISPLAY USES P1.0.  Do not touch!!! 
@@ -53,15 +54,24 @@ switch_interrupt_handler()
 }
 
 short redrawScreen = 1;
+void song();
+int count = 0;
+int second = 0;
 
 void wdt_c_handler()
 {
   static int secCount = 0;
-
+  
   secCount ++;
   if (secCount >= 25) {		/* 10/sec */
     secCount = 0;
     redrawScreen = 1;
+  }
+  count++;
+  if (count >= 250){
+    count = 0;
+    second++;
+    song();
   }
 }
   
@@ -81,6 +91,7 @@ void main()
   configureClocks();
   lcd_init();
   switch_init();
+  buzzer_init();
   
   enableWDTInterrupts();      /**< enable periodic interrupt */
   or_sr(0x8);	              /**< GIE (enable interrupts) */
@@ -105,6 +116,7 @@ void main()
   drawString5x7(40, 70, "GAME OVER", COLOR_WHITE, COLOR_BLACK);
   drawString5x7(82, 80, correct, COLOR_WHITE, COLOR_BLACK);
   drawString5x7(40, 80, "SCORE: ", COLOR_WHITE, COLOR_BLACK);
+  
 
 }
 
@@ -224,6 +236,30 @@ update_shape()
   }
 }
 
+void
+song()
+{
+  switch(second%6){
+  case 1:
+    buzzer_set_period(1516);
+    break;
+  case 2:
+    buzzer_set_period(1911);
+    break;
+  case 3:
+    buzzer_set_period(1275);
+    break;
+  case 4:
+    buzzer_set_period(2551);
+    break;
+  case 5:
+    buzzer_set_period(3033);
+    break;
+  default:
+    buzzer_set_period(2272);
+    break;
+  }
+}
 
 /* Switch on S2 */
 void
