@@ -3,12 +3,11 @@
 #include "lcdutils.h"
 #include "lcddraw.h"
 #include "buzzer.h"
-#include <time.h>
+#include "song.h"
 
-// WARNING: LCD DISPLAY USES P1.0.  Do not touch!!! 
 
-#define LED BIT6		/* note that bit zero req'd for display */
-
+//All Bits that I'll be using for this lab (Switches and LED)
+#define LED BIT6
 #define SW1 1
 #define SW2 2
 #define SW3 4
@@ -16,26 +15,31 @@
 
 #define SWITCHES 15
 
+//Here I have all the colors for the squares, the number of colors, and the current one
 unsigned short s_colors[] = {COLOR_DARK_VIOLE, COLOR_DARK_GREEN, COLOR_RED};
 int curr_color = 0;
 int num_colors = 3;
+
+//Here I have all the positions where the squares can appear on the screen, number of positions and current position
 unsigned short position_row[] = {30, 80, (screenHeight-20), 120, 145, 44, 30};
 unsigned short position_col[] = {10, (screenWidth-20), 80, 30, 100, 89, 78};
 int position = 0;
 int num_positions = 7;
-  
+
+/* Update switch interrupt to detect changes from current buttons */
 static char 
 switch_update_interrupt_sense()
 {
   char p2val = P2IN;
-  /* update switch interrupt to detect changes from current buttons */
+  
   P2IES |= (p2val & SWITCHES);	/* if switch up, sense down */
   P2IES &= (p2val | ~SWITCHES);	/* if switch down, sense up */
   return p2val;
 }
 
+/* Set up switches */
 void 
-switch_init()			/* setup switch */
+switch_init()			
 {  
   P2REN |= SWITCHES;		/* enables resistors for switches */
   P2IE |= SWITCHES;		/* enable interrupts from switches */
@@ -46,6 +50,7 @@ switch_init()			/* setup switch */
 
 int switches = 0;
 
+/* Checks if an interrupt in the switches happens */
 void
 switch_interrupt_handler()
 {
@@ -57,6 +62,7 @@ short redrawScreen = 1;
 void song();
 int count = 0;
 int second = 0;
+
 
 void wdt_c_handler()
 {
@@ -74,7 +80,8 @@ void wdt_c_handler()
     song();
   }
 }
-  
+
+/* Functions that I'll use to show the Rules and to update screen */
 void update_shape();
 void rules();
 void update_score();
@@ -97,13 +104,13 @@ void main()
   or_sr(0x8);	              /**< GIE (enable interrupts) */
   
   clearScreen(COLOR_BLACK);
-  while(ruling<=250){
+  while(ruling<=250){        /* Show rules on the screen */
     rules();
   }
  
   clearScreen(COLOR_WHITE);
   
-  while (incorrect < 5) {			/* forever */
+  while (incorrect < 5) {			/* Keep playing until user gets 5 wrong */
     if (redrawScreen) {
       redrawScreen = 0;
       update_shape();
@@ -120,6 +127,7 @@ void main()
 
 }
 
+/* Rules are just a lot of drawStrings calls */
 void
 rules()
 {
@@ -147,6 +155,7 @@ rules()
   ruling++;
 }
 
+/* Updates the score, since I used an array of chars, I have to reset score if it goes above 9 */
 void
 update_score()
 {
@@ -171,12 +180,14 @@ update_score()
   
 }
 
+/* Variables I'll use in update screen*/
 int step = 0;
 int guess = 0;
 int squares = 0;
 int speed = 60;
 int srand();
 
+/* Updates screen, prints put a square at a random position and random color */
 void
 update_shape()
 {
@@ -236,6 +247,10 @@ update_shape()
   }
 }
 
+
+/* Is the song for the game. This function was translated to Assembly */
+
+/*
 void
 song()
 {
@@ -259,7 +274,7 @@ song()
     buzzer_set_period(2272);
     break;
   }
-}
+}*/
 
 /* Switch on S2 */
 void
